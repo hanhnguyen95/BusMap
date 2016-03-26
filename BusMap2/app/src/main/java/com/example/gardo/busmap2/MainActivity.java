@@ -3,7 +3,9 @@ package com.example.gardo.busmap2;
 import android.Manifest;
 import android.app.Dialog;
 import android.content.pm.PackageManager;
+import android.location.Address;
 import android.location.Criteria;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -17,6 +19,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.example.madhu.simpleplace.R;
@@ -28,6 +31,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -119,6 +123,12 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
             }
 
             locationManager.requestLocationUpdates(provider, 20000, 0, this);
+            GPSTracker mGPS = new GPSTracker(MainActivity.this);
+            if(mGPS.canGetLocation()){
+                mGPS.getLocation();
+                mLatitude = mGPS.getLatitude();
+                mLongitude = mGPS.getLongitude();
+            }
             StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
             sb.append("location=" + mLatitude + "," + mLongitude);
             sb.append("&radius=3000");
@@ -138,7 +148,11 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    try {
+                        onSearch();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
         }
@@ -146,6 +160,35 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+    public void onSearch() throws IOException {
+        EditText location_tf = (EditText) findViewById(R.id.txtSearch);
+        String location = location_tf.getText().toString();
+        List<Address> addressList = null;
+        if(location != null || !location.equals("")){
+            Geocoder geocoder = new Geocoder(this);
+            try {
+                addressList = geocoder.getFromLocationName(location, 1);
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+            Address address = addressList.get(0);
+            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+            StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+            sb.append("location=" + latLng.latitude + "," + latLng.longitude);
+            sb.append("&radius=3000");
+            sb.append("&types=bus_station");
+            sb.append("&sensor=true");
+            sb.append("&key=AIzaSyCnrqoC5LavSz9JlKSzH6rqO_PWYxWdJT4");
+
+
+            // Creating a new non-ui thread task to download Google place json data
+            PlacesTask placesTask = new PlacesTask();
+
+            // Invokes the "doInBackground()" method of the class PlaceTask
+            Log.d("url", sb.toString());
+            placesTask.execute(sb.toString());
+        }
     }
 
     /**
