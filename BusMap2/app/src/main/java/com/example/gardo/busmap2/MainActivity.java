@@ -7,18 +7,24 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Spinner;
 
 import com.example.madhu.simpleplace.R;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -41,14 +47,19 @@ import java.util.List;
 public class MainActivity extends FragmentActivity implements LocationListener, GoogleMap.OnMapClickListener {
 
     GoogleMap mGoogleMap;
-    Spinner mSprPlaceType;
 
-    String[] mPlaceType = null;
-    String[] mPlaceTypeName = null;
     ListView listView;
     double mLatitude = 0;
     double mLongitude = 0;
     LatLng center;
+    ArrayList<String> nameList;
+    ArrayAdapter<String> adapter;
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +100,6 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
             mGoogleMap.setMyLocationEnabled(true);
 
 
-
             // Getting LocationManager object from System Service LOCATION_SERVICE
             LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -102,7 +112,7 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
             // Getting Current Location From GPS
             Location location = locationManager.getLastKnownLocation(provider);
 
-            if(location!=null){
+            if (location != null) {
 
                 onLocationChanged(location);
 
@@ -110,7 +120,7 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
 
             locationManager.requestLocationUpdates(provider, 20000, 0, this);
             StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-            sb.append("location="+mLatitude+","+mLongitude);
+            sb.append("location=" + mLatitude + "," + mLongitude);
             sb.append("&radius=3000");
             sb.append("&types=bus_station");
             sb.append("&sensor=true");
@@ -121,18 +131,31 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
             PlacesTask placesTask = new PlacesTask();
 
             // Invokes the "doInBackground()" method of the class PlaceTask
-            Log.d("url",sb.toString());
+            Log.d("url", sb.toString());
             placesTask.execute(sb.toString());
+            Button button = (Button) findViewById(R.id.btnSearch);
+
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
         }
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    /** A method to download json data from url */
-    private String downloadUrl(String strUrl) throws IOException{
+    /**
+     * A method to download json data from url
+     */
+    private String downloadUrl(String strUrl) throws IOException {
         String data = "";
         InputStream iStream = null;
         HttpURLConnection urlConnection = null;
-        try{
+        try {
             URL url = new URL(strUrl);
 
 
@@ -147,10 +170,10 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
 
             BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
 
-            StringBuffer sb  = new StringBuffer();
+            StringBuffer sb = new StringBuffer();
 
             String line = "";
-            while( ( line = br.readLine())  != null){
+            while ((line = br.readLine()) != null) {
                 sb.append(line);
             }
 
@@ -158,9 +181,9 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
 
             br.close();
 
-        }catch(Exception e){
+        } catch (Exception e) {
             Log.d("Exception while downloading url", e.toString());
-        }finally{
+        } finally {
             iStream.close();
             urlConnection.disconnect();
         }
@@ -172,31 +195,73 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
     public void onMapClick(LatLng latLng) {
         center = mGoogleMap.getCameraPosition().target;
         //  Toast.makeText(MainActivity.this, center.toString(), Toast.LENGTH_LONG).show();
-        mLatitude= center.latitude;
-        mLongitude=center.longitude;
+        mLatitude = center.latitude;
+        mLongitude = center.longitude;
 
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
 
-    /** A class, to download Google Places */
-    private class PlacesTask extends AsyncTask<String, Integer, String>{
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.gardo.busmap2/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.gardo.busmap2/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
+    }
+
+
+    /**
+     * A class, to download Google Places
+     */
+    private class PlacesTask extends AsyncTask<String, Integer, String> {
 
         String data = null;
 
         // Invoked by execute() method of this object
         @Override
         protected String doInBackground(String... url) {
-            try{
+            try {
                 data = downloadUrl(url[0]);
-            }catch(Exception e){
-                Log.d("Background Task",e.toString());
+            } catch (Exception e) {
+                Log.d("Background Task", e.toString());
             }
             return data;
         }
 
         // Executed after the complete execution of doInBackground() method
         @Override
-        protected void onPostExecute(String result){
+        protected void onPostExecute(String result) {
             ParserTask parserTask = new ParserTask();
 
             // Start parsing the Google places in JSON format
@@ -206,39 +271,42 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
 
     }
 
-    /** A class to parse the Google Places in JSON format */
-    private class ParserTask extends AsyncTask<String, Integer, List<HashMap<String,String>>>{
+    /**
+     * A class to parse the Google Places in JSON format
+     */
+    private class ParserTask extends AsyncTask<String, Integer, List<HashMap<String, String>>> {
 
         JSONObject jObject;
 
         // Invoked by execute() method of this object
         @Override
-        protected List<HashMap<String,String>> doInBackground(String... jsonData) {
+        protected List<HashMap<String, String>> doInBackground(String... jsonData) {
 
             List<HashMap<String, String>> places = null;
             PlaceJSONParser placeJsonParser = new PlaceJSONParser();
 
-            try{
+            try {
                 jObject = new JSONObject(jsonData[0]);
 
                 /** Getting the parsed data as a List construct */
                 places = placeJsonParser.parse(jObject);
 
-            }catch(Exception e){
-                Log.d("Exception",e.toString());
+            } catch (Exception e) {
+                Log.d("Exception", e.toString());
             }
             return places;
         }
 
         // Executed after the complete execution of doInBackground() method
         @Override
-        protected void onPostExecute(List<HashMap<String,String>> list){
+        protected void onPostExecute(List<HashMap<String, String>> list) {
 
             // Clears all the existing markers
             mGoogleMap.clear();
-            ArrayList<String> name = new ArrayList<>();
+            nameList = new ArrayList<>();
+            ArrayList<String> timeList = new ArrayList<>();
 
-            for(int i=0;i<list.size();i++){
+            for (int i = 0; i < list.size(); i++) {
 
                 // Creating a marker
                 MarkerOptions markerOptions = new MarkerOptions();
@@ -253,7 +321,7 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
                 double lng = Double.parseDouble(hmPlace.get("lng"));
 
                 // Getting name
-                String nameList = hmPlace.get("place_name");
+                String name = hmPlace.get("place_name");
 
                 // Getting vicinity
                 String vicinity = hmPlace.get("vicinity");
@@ -267,15 +335,17 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
                 //This will be displayed on taping the marker
                 markerOptions.title(name + " : " + vicinity);
 
+                nameList.add(name);
+
                 // Placing a marker on the touched position
                 mGoogleMap.addMarker(markerOptions);
 
             }
-
+            adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1,nameList);
+            listView.setAdapter(adapter);
         }
 
     }
-
 
 
     @Override
