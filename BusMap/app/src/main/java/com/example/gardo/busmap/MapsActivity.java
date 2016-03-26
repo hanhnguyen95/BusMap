@@ -1,7 +1,14 @@
 package com.example.gardo.busmap;
 
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -10,18 +17,50 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+import java.util.ArrayList;
 
-    private GoogleMap mMap;
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,AdapterView.OnItemClickListener {
+
+    protected GoogleMap mMap;
+    protected String strSearch;
+    protected EditText plainText;
+    protected ListView listView;
+    protected Button btnSearch;
+    protected ArrayList<String> arrayList;
+    protected ArrayAdapter<String>adapter;
+    protected RelativeLayout relativeLayout;
+    protected RelativeLayout relativeD_Layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.wait);
+
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        relativeLayout = (RelativeLayout)findViewById(R.id.reLayout);
+
+//        plainText = (EditText)findViewById(R.id.txtSearch);
+        listView = (ListView)findViewById(R.id.listView);
+        btnSearch = (Button)findViewById(R.id.btnSearch);
+        strSearch= plainText.getText().toString();
+        arrayList = new ArrayList<>();
+        arrayList.add("Hanh");
+        arrayList.add("Tu");
+        arrayList.add("Thuong");
+        arrayList.add("Quan");
+        arrayList.add("Hanh1");
+        arrayList.add("Tu2");
+        arrayList.add("Thuong3");
+        arrayList.add("Quan4");
+        adapter = new ArrayAdapter<String>(this,android.
+                R.layout.simple_list_item_1,arrayList);
+        listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(this);
     }
 
 
@@ -42,5 +81,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        setContentView(R.layout.detail_form);
     }
 }
