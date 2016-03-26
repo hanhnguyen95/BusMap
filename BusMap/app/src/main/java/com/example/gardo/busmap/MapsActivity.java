@@ -29,13 +29,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected ArrayList<String> arrayList;
     protected ArrayAdapter<String>adapter;
     protected RelativeLayout relativeLayout;
-    protected RelativeLayout relativeD_Layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.wait);
-
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -46,7 +43,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        plainText = (EditText)findViewById(R.id.txtSearch);
         listView = (ListView)findViewById(R.id.listView);
         btnSearch = (Button)findViewById(R.id.btnSearch);
-        strSearch= plainText.getText().toString();
+//        strSearch= plainText.getText().toString();
         arrayList = new ArrayList<>();
         arrayList.add("Hanh");
         arrayList.add("Tu");
@@ -59,7 +56,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         adapter = new ArrayAdapter<String>(this,android.
                 R.layout.simple_list_item_1,arrayList);
         listView.setAdapter(adapter);
-
         listView.setOnItemClickListener(this);
     }
 
@@ -86,5 +82,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         setContentView(R.layout.detail_form);
+//        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) relativeLayout.getLayoutParams();
+//        lp.setMargins(50,50,50,50);
+//        relativeLayout.setLayoutParams(lp);
+//        view.setVisibility(View.VISIBLE);
+//        view.setVisibility(View.GONE);
     }
 }
