@@ -17,6 +17,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,7 +32,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -53,11 +53,17 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
     GoogleMap mGoogleMap;
 
     ListView listView;
+    ListView listView2;
     double mLatitude = 0;
     double mLongitude = 0;
     LatLng center;
     ArrayList<String> nameList;
+    ArrayList<String> nameList2;
     ArrayAdapter<String> adapter;
+    ArrayAdapter<String> adapter2;
+    ArrayList<String> name_bus = new ArrayList<>();
+    ArrayList<Double> speed_bus = new ArrayList<>();
+    ArrayList<LatLng> location_bus = new ArrayList<>();
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -98,7 +104,6 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
             mGoogleMap.getUiSettings().setMapToolbarEnabled(true);
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             }
-            mGoogleMap.setMyLocationEnabled(true);
 
             // Enabling MyLocation in Google Map
             mGoogleMap.setMyLocationEnabled(true);
@@ -129,14 +134,43 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
                 mLatitude = mGPS.getLatitude();
                 mLongitude = mGPS.getLongitude();
             }
+
             StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
             sb.append("location=" + mLatitude + "," + mLongitude);
             sb.append("&radius=3000");
             sb.append("&types=bus_station");
             sb.append("&sensor=true");
             sb.append("&key=AIzaSyCnrqoC5LavSz9JlKSzH6rqO_PWYxWdJT4");
-
-
+            name_bus.add("53");
+            name_bus.add("52");
+            name_bus.add("51");
+            name_bus.add("50");
+            speed_bus.add(34.5);
+            speed_bus.add(30.5);
+            speed_bus.add(32.5);
+            speed_bus.add(35.5);
+            location_bus.add(new LatLng(10.992, 106.659));
+            location_bus.add(new LatLng(11.008, 106.669));
+            location_bus.add(new LatLng(10.996, 106.651));
+            location_bus.add(new LatLng(11.0054, 106.657));
+            nameList2 = new ArrayList<>();
+            for(int i = 0; i < name_bus.size(); i++){
+                Location loc1 = new Location("");
+                Location loc2 = new Location("");
+                loc1.setLatitude(mLatitude);
+                loc1.setLongitude(mLongitude);
+                loc2.setLatitude(location_bus.get(i).latitude);
+                loc2.setLongitude(location_bus.get(i).longitude);
+                double distance = loc1.distanceTo(loc2);
+                double time = Math.round(((distance / 100) / speed_bus.get(i)) * 100);
+                time = time/100;
+                if(time >= 1) {
+                    nameList2.add(name_bus.get(i) + "              " + ((int)time) + "h" + ((int)((time - ((int)time)) * 60)) + "m");
+                }
+                else{
+                    nameList2.add(name_bus.get(i) + "              " +  ((int)(time * 60)) + "m");
+                }
+            }
             // Creating a new non-ui thread task to download Google place json data
             PlacesTask placesTask = new PlacesTask();
 
@@ -181,13 +215,23 @@ public class MainActivity extends FragmentActivity implements LocationListener, 
             sb.append("&sensor=true");
             sb.append("&key=AIzaSyCnrqoC5LavSz9JlKSzH6rqO_PWYxWdJT4");
 
-
+            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             // Creating a new non-ui thread task to download Google place json data
             PlacesTask placesTask = new PlacesTask();
 
             // Invokes the "doInBackground()" method of the class PlaceTask
             Log.d("url", sb.toString());
             placesTask.execute(sb.toString());
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    setContentView(R.layout.list_bus);
+                    listView2 = (ListView) findViewById(R.id.listView2);
+                    adapter2 = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1,nameList2);
+                    listView2.setAdapter(adapter2);
+                }
+            });
+
         }
     }
 
